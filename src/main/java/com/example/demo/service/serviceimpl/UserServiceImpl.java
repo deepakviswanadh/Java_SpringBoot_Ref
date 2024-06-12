@@ -2,18 +2,18 @@ package com.example.demo.service.serviceimpl;
 
 import com.example.demo.entity.UserEntity;
 import com.example.demo.exceptions.GeneralServiceException;
-import com.example.demo.model.UserModel;
+import com.example.demo.DTO.UserDTO;
+import com.example.demo.mapper.UserMapper;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.UserService;
+import org.apache.catalina.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -22,6 +22,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    private UserMapper userMapper;
 
 
     @Override
@@ -52,15 +55,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserEntity addNewUser(UserModel user) {
+    public UserEntity addNewUser(UserDTO user) {
        try{
            logger.info("addNewUser() Service hit started for user: {}", user);
-           UserEntity newUser = UserEntity.builder()
-                   .name(user.name)
-                   .email(user.email)
-                   .address(user.address)
-                   .phonenumber(user.phone_number)
-                   .build();
+//           UserEntity newUser = UserEntity.builder()
+//                   .name(user.name)
+//                   .email(user.email)
+//                   .address(user.address)
+//                   .phonenumber(user.phone_number)
+//                   .build();
+           UserEntity newUser= userMapper.toEntity(user);
            userRepository.save(newUser);
            logger.info("addNewUser Service hit completed for user: {}", newUser);
            return newUser;
