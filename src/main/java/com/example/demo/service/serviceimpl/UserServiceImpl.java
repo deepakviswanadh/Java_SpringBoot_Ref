@@ -2,7 +2,7 @@ package com.example.demo.service.serviceimpl;
 
 import com.example.demo.entity.UserEntity;
 import com.example.demo.exceptions.GeneralServiceException;
-import com.example.demo.config.DTO.UserDTO;
+import com.example.demo.DTO.UserDTO;
 import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.mapper.UserMapper;
 import com.example.demo.repository.UserRepository;
@@ -10,7 +10,6 @@ import com.example.demo.service.UserService;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
@@ -82,7 +81,8 @@ public class UserServiceImpl implements UserService {
         try {
             logger.info("filterUsers() Service hit started for name: {} and email: {}", name, email);
             Optional<List<UserEntity>> usersOptional = userRepository.findUsersByFilters(name, email);
-            //To:Do: (updated) -> Move this to predicate and handle filtering there with varying params
+            //To:Do: (updated) -> Move this to criteria builder & predicate
+            // and handle filtering there with varying params
 
             //To:Do -> remove this throw as this will never throw an exception
             //validate the query params by checking if they really exist in db

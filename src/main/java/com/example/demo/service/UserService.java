@@ -1,7 +1,7 @@
 package com.example.demo.service;
 
 import com.example.demo.entity.UserEntity;
-import com.example.demo.config.DTO.UserDTO;
+import com.example.demo.DTO.UserDTO;
 
 import java.util.List;
 

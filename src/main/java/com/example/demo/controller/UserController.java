@@ -1,7 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.entity.UserEntity;
-import com.example.demo.config.DTO.UserDTO;
+import com.example.demo.DTO.UserDTO;
 import com.example.demo.service.UserService;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;

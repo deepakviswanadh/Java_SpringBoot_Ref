@@ -1,6 +1,6 @@
 package com.example.demo.mapper.mapperimpl;
 
-import com.example.demo.config.DTO.UserDTO;
+import com.example.demo.DTO.UserDTO;
 import com.example.demo.entity.UserEntity;
 import com.example.demo.mapper.UserMapper;
 import lombok.AllArgsConstructor;
