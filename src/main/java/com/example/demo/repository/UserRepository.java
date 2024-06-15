@@ -6,13 +6,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity,Integer> {
 
     @Query("SELECT u FROM UserEntity u WHERE u.id = :id")
-    public UserEntity findUserByName(Integer id);
+    public Optional<UserEntity> findUserById(Integer id);
 
     @Query("SELECT u FROM UserEntity u WHERE u.name = :name AND u.email = :email")
-    public List<UserEntity> findUsersByFilters(String name, String email);
+    public Optional<List<UserEntity>> findUsersByFilters(String name, String email);
 }

@@ -1,16 +1,16 @@
 package com.example.demo.mapper.mapperimpl;
 
-import com.example.demo.DTO.UserDTO;
+import com.example.demo.config.DTO.UserDTO;
 import com.example.demo.entity.UserEntity;
 import com.example.demo.mapper.UserMapper;
+import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@AllArgsConstructor
 public class UserMapperImpl implements UserMapper {
 
-    @Autowired
     private ModelMapper modelMapper;
 
     @Override

@@ -1,16 +1,16 @@
 package com.example.demo.service;
 
 import com.example.demo.entity.UserEntity;
-import com.example.demo.DTO.UserDTO;
+import com.example.demo.config.DTO.UserDTO;
 
 import java.util.List;
 
 public interface UserService {
     public List<UserEntity> findAllUsers();
 
-    public UserEntity findUser(Integer id);
+    public UserDTO findUserById(Integer id);
 
-    public UserEntity addNewUser(UserDTO user);
+    public UserDTO addNewUser(UserDTO user);
 
     public List<UserEntity> filterUsers(String name, String email);
 }
