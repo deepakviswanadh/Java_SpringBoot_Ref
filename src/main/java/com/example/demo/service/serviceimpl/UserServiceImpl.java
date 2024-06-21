@@ -1,16 +1,16 @@
 package com.example.demo.service.serviceimpl;
 
 import com.example.demo.entity.UserEntity;
-import com.example.demo.exceptions.GeneralServiceException;
-import com.example.demo.config.DTO.UserDTO;
-import com.example.demo.exceptions.ResourceNotFoundException;
+import com.example.demo.exceptions.Types.FieldAlreadyExistsException;
+import com.example.demo.exceptions.Types.GeneralServiceException;
+import com.example.demo.DTO.UserDTO;
+import com.example.demo.exceptions.Types.ResourceNotFoundException;
 import com.example.demo.mapper.UserMapper;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.UserService;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
@@ -38,7 +38,7 @@ public class UserServiceImpl implements UserService {
             return users;
         }catch(Exception e){
             logger.error("Error in findAllUsers() service: {}", e.getMessage());
-            throw new GeneralServiceException("UserServiceImpl Service Layer Exception", e);
+            throw new GeneralServiceException("UserServiceImpl Service Layer Exception");
         }
     }
 
@@ -53,13 +53,13 @@ public class UserServiceImpl implements UserService {
             return user;
         } catch (DataAccessException e) {
             logger.error("Error in findUser() service: {}", e.getMessage());
-            throw new GeneralServiceException("UserServiceImpl Service Layer Exception", e);
+            throw new GeneralServiceException("UserServiceImpl Service Layer Exception");
         }
     }
 
     @Override
     public UserDTO addNewUser(UserDTO user) {
-       try{
+       try {
            logger.info("addNewUser() Service hit started for user: {}", user);
 //           UserEntity newUser = UserEntity.builder()
 //                   .name(user.name)
@@ -67,13 +67,22 @@ public class UserServiceImpl implements UserService {
 //                   .address(user.address)
 //                   .phonenumber(user.phone_number)
 //                   .build();
-           UserEntity newUser= userMapper.toEntity(user);
+           Optional<UserEntity> exisitingUser = userRepository.findByEmail(user.getEmail());
+           if (exisitingUser.isPresent()) {
+               throw new FieldAlreadyExistsException("Email", "email", user.getEmail());
+           }
+           String nullString = null;
+           nullString.length(); // This will throw NullPointerException
+           UserEntity newUser = userMapper.toEntity(user);
            userRepository.save(newUser);
            logger.info("addNewUser Service hit completed for user: {}", newUser);
            return userMapper.toModel(newUser);
        }catch(Exception e){
+           if (e instanceof FieldAlreadyExistsException) {
+               throw (FieldAlreadyExistsException) e;
+           }
            logger.error("Error in addNewUser() service: {}", e.getMessage());
-           throw new GeneralServiceException("UserServiceImpl Service Layer Exception", e);
+           throw new GeneralServiceException("UserServiceImpl Service Layer Exception");
        }
     }
 
@@ -82,7 +91,8 @@ public class UserServiceImpl implements UserService {
         try {
             logger.info("filterUsers() Service hit started for name: {} and email: {}", name, email);
             Optional<List<UserEntity>> usersOptional = userRepository.findUsersByFilters(name, email);
-            //To:Do: (updated) -> Move this to predicate and handle filtering there with varying params
+            //To:Do: (updated) -> Move this to criteria builder & predicate
+            // and handle filtering there with varying params
 
             //To:Do -> remove this throw as this will never throw an exception
             //validate the query params by checking if they really exist in db
@@ -95,7 +105,7 @@ public class UserServiceImpl implements UserService {
             return users;
         } catch (Exception e) {
             logger.error("Error in filterUsers() service: {}", e.getMessage());
-            throw new GeneralServiceException("UserServiceImpl Service Layer Exception", e);
+            throw new GeneralServiceException("UserServiceImpl Service Layer Exception");
         }
     }
 }

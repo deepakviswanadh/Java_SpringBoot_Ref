@@ -1,4 +1,4 @@
-package com.example.demo.exceptions;
+package com.example.demo.exceptions.Types;
 
 public class GeneralServiceException extends RuntimeException {
 
