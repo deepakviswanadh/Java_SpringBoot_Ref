@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.entity.UserEntity;
 import com.example.demo.DTO.UserDTO;
 import com.example.demo.service.UserService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +39,7 @@ public class UserController {
     }
 
     @PostMapping("/addNewUser")
-    public ResponseEntity<UserDTO> addNewUser(@RequestBody UserDTO user) {
+    public ResponseEntity<UserDTO> addNewUser(@Valid @RequestBody UserDTO user) {
         logger.info("/users/addNewUser hit started with request body {}",user);
         UserDTO newUser = userService.addNewUser(user);
         logger.info("/users/addNewUser complete with new User {}",newUser);

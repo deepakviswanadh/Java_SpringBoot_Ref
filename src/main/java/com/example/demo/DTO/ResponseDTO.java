@@ -11,7 +11,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ResponseDTO {
     private LocalDateTime timestamp;
-    private String message;
+    private Object message;
     private String path;
     private String errorCode;
+
 }
