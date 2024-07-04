@@ -1,5 +1,6 @@
 package com.example.demo.service.serviceimpl;
 
+import com.example.demo.DTO.WebClientDTO;
 import com.example.demo.entity.UserEntity;
 import com.example.demo.exceptions.Types.FieldAlreadyExistsException;
 import com.example.demo.exceptions.Types.GeneralServiceException;
@@ -13,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,16 +29,18 @@ public class UserServiceImpl implements UserService {
 
     private UserMapper userMapper;
 
+    private WebClient webClient;
+
 
     @Override
     public List<UserEntity> findAllUsers() {
-        try{
+        try {
 
             logger.info("findAllUsers() service hit started");
-            List<UserEntity> users=userRepository.findAll();
+            List<UserEntity> users = userRepository.findAll();
             logger.info("findAllUsers() service hit successful");
             return users;
-        }catch(Exception e){
+        } catch (Exception e) {
             logger.error("Error in findAllUsers() service: {}", e.getMessage());
             throw new GeneralServiceException("UserServiceImpl Service Layer Exception");
         }
@@ -47,8 +51,19 @@ public class UserServiceImpl implements UserService {
         try {
             logger.info("findUser() Service hit started for user id: {}", id);
             UserDTO user = userMapper.toModel(userRepository.findUserById(id).orElseThrow(
-                    ()-> new ResourceNotFoundException("User","Id",id)
+                    () -> new ResourceNotFoundException("User", "Id", id)
             ));
+
+//            let's say we want to call some other microservice that fetches some more info
+//            just to demonstrate webclient, it is reactive in nature
+//
+//            WebClientDTO webClientDTOResponse = webClient
+//                    .get()
+//                    .uri("microservice uri")
+//                    .retrieve()
+//                    .bodyToMono(WebClientDTO.class)
+//                    .block();
+
             logger.info("findUser Service hit successful, Found: {}", user);
             return user;
         } catch (DataAccessException e) {
@@ -59,31 +74,30 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO addNewUser(UserDTO user) {
-       try {
-           logger.info("addNewUser() Service hit started for user: {}", user);
-//           UserEntity newUser = UserEntity.builder()
+        try {
+            logger.info("addNewUser() Service hit started for user: {}", user);
+            Optional<UserEntity> exisitingUser = userRepository.findByEmail(user.getEmail());
+            if (exisitingUser.isPresent()) {
+                throw new FieldAlreadyExistsException("Email", "email", user.getEmail());
+            }
+//         UserEntity newUser = UserEntity
+//                   .builder()
 //                   .name(user.name)
 //                   .email(user.email)
 //                   .address(user.address)
 //                   .phonenumber(user.phone_number)
 //                   .build();
-           Optional<UserEntity> exisitingUser = userRepository.findByEmail(user.getEmail());
-           if (exisitingUser.isPresent()) {
-               throw new FieldAlreadyExistsException("Email", "email", user.getEmail());
-           }
-           String nullString = null;
-           nullString.length(); // This will throw NullPointerException
-           UserEntity newUser = userMapper.toEntity(user);
-           userRepository.save(newUser);
-           logger.info("addNewUser Service hit completed for user: {}", newUser);
-           return userMapper.toModel(newUser);
-       }catch(Exception e){
-           if (e instanceof FieldAlreadyExistsException) {
-               throw (FieldAlreadyExistsException) e;
-           }
-           logger.error("Error in addNewUser() service: {}", e.getMessage());
-           throw new GeneralServiceException("UserServiceImpl Service Layer Exception");
-       }
+            UserEntity newUser = userMapper.toEntity(user);
+            userRepository.save(newUser);
+            logger.info("addNewUser Service hit completed for user: {}", newUser);
+            return userMapper.toModel(newUser);
+        } catch (Exception e) {
+            if (e instanceof FieldAlreadyExistsException) {
+                throw (FieldAlreadyExistsException) e;
+            }
+            logger.error("Error in addNewUser() service: {}", e.getMessage());
+            throw new GeneralServiceException("UserServiceImpl Service Layer Exception");
+        }
     }
 
     @Override
