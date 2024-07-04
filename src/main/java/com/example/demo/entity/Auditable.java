@@ -10,6 +10,6 @@ public class Auditable {
     private String createdAt = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
 
     @Column(name = "created_by", nullable = false)
-    private String createdBy;
+    private String createdBy="spring-boot";
 
 }
