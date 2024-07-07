@@ -8,7 +8,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class WebClientDTO {
-
-    public String sampleField1;
-    public String sampleField2;
+    private Long id;
+    private String departmentName;
+    private String departmentDescription;
+    private String departmentCode;
 }

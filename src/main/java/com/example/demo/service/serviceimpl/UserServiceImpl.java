@@ -1,6 +1,8 @@
 package com.example.demo.service.serviceimpl;
 
 import com.example.demo.DTO.WebClientDTO;
+import com.example.demo.apis.RestTemplateService;
+import com.example.demo.apis.openfeign.APIClient;
 import com.example.demo.entity.UserEntity;
 import com.example.demo.exceptions.Types.FieldAlreadyExistsException;
 import com.example.demo.exceptions.Types.GeneralServiceException;
@@ -9,12 +11,16 @@ import com.example.demo.exceptions.Types.ResourceNotFoundException;
 import com.example.demo.mapper.UserMapper;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.UserService;
+import jakarta.ws.rs.ServiceUnavailableException;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.dao.DataAccessException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,13 +30,11 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
-    private UserRepository userRepository;
-
-    private UserMapper userMapper;
-
-    private WebClient webClient;
-
+    private final UserRepository userRepository;
+    private final UserMapper userMapper;
+    private final RestTemplateService restTemplateService;
+    private final LoadBalancerClient loadBalancerClient;
+    private final APIClient apiClient;
 
     @Override
     public List<UserEntity> findAllUsers() {
@@ -54,17 +58,26 @@ public class UserServiceImpl implements UserService {
                     () -> new ResourceNotFoundException("User", "Id", id)
             ));
 
-//            let's say we want to call some other microservice that fetches some more info
-//            just to demonstrate webclient, it is reactive in nature
+//            ServiceInstance serviceInstance = loadBalancerClient.choose("MS2");
+//            if (serviceInstance == null) {
+//                logger.warn("No instances available for MS2");
+//                throw new GeneralServiceException("MS2 is not available");
+//            }
 //
-//            WebClientDTO webClientDTOResponse = webClient
-//                    .get()
-//                    .uri("microservice uri")
-//                    .retrieve()
-//                    .bodyToMono(WebClientDTO.class)
-//                    .block();
+//            String departmentServiceUrl = serviceInstance.getUri().toString();
+//
+//            logger.info("Hitting the ms2 service with url, {}", departmentServiceUrl);
+//
+//            ResponseEntity<WebClientDTO> response = restTemplateService.getForEntity(
+//                    departmentServiceUrl + "/api/departments/HR01",
+//                    WebClientDTO.class);
+//
+//            WebClientDTO webClientDTOResponse = response.getBody();
+//
+//            logger.info("Hitting the ms2 service complete with response: {}", response);
+//            logger.info("findUser Service hit successful, Found: {}", user);
 
-            logger.info("findUser Service hit successful, Found: {}", user);
+            WebClientDTO response=apiClient.getDepartment();
             return user;
         } catch (DataAccessException e) {
             logger.error("Error in findUser() service: {}", e.getMessage());
