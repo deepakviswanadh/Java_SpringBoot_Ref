@@ -16,6 +16,11 @@ public class FeignClientConfig {
 
     private final LoadBalancerClient loadBalancerClient;
 
+    //RequestInterceptor is an interface here and we are defining an
+    //anonymous class which implements that interface and returns it
+    //open feign scans for bean which returns RequestInterceptor
+    //and uses that bean's implementation.
+
     @Bean
     public RequestInterceptor loggingRequestInterceptor() {
         return new RequestInterceptor() {
