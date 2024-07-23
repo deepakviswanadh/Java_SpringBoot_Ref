@@ -11,6 +11,7 @@ import com.example.demo.mapper.UserMapper;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.UserService;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +21,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+
+import static com.example.demo.utils.constants.DEFAULT_VALUE;
 
 @Service
 @AllArgsConstructor
@@ -45,14 +48,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @CircuitBreaker(name = "${spring.application.name}", fallbackMethod = "getDefaultResponse")
     public UserDTO findUserById(Integer id) {
         try {
-            logger.info("findUser() Service hit started for user id: {}", id);
+            logger.info("findUserById() Service hit started for user id: {}", id);
             UserDTO user = userMapper.toModel(userRepository.findUserById(id).orElseThrow(
                     () -> new ResourceNotFoundException("User", "Id", id)
             ));
             WebClientDTO response=apiClient.getDepartment();
-            logger.info("Response returned from OpenFeign {}", response);
+            logger.info("findUserById() Service completed for user id: {} with response: {}", id,response);
             return user;
         } catch (DataAccessException e) {
             logger.error("Error in findUser() service: {}", e.getMessage());
@@ -107,6 +111,26 @@ public class UserServiceImpl implements UserService {
             return users;
         } catch (Exception e) {
             logger.error("Error in filterUsers() service: {}", e.getMessage());
+            throw new GeneralServiceException("UserServiceImpl Service Layer Exception");
+        }
+    }
+
+    public UserDTO getDefaultResponse(Integer id, Exception ex) {
+        try {
+            logger.info("getDefaultResponse() fallback hit started for user id: {}", id);
+            UserDTO user = userMapper.toModel(userRepository.findUserById(id).orElseThrow(
+                    () -> new ResourceNotFoundException("User", "Id", id)
+            ));
+            WebClientDTO defaultResponse = new WebClientDTO().builder()
+                    .id(000L)
+                    .departmentCode(DEFAULT_VALUE)
+                    .departmentName(DEFAULT_VALUE)
+                    .departmentDescription(DEFAULT_VALUE)
+                    .build();
+            logger.info("getDefaultResponse() fallback completed for user : {}", id);
+            return user;
+        } catch (DataAccessException e) {
+            logger.error("Error in getDefaultResponse() fallback: {}", e.getMessage());
             throw new GeneralServiceException("UserServiceImpl Service Layer Exception");
         }
     }
