@@ -14,7 +14,6 @@ import static com.example.demo.utils.constants.USERS_TABLE;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = USERS_TABLE)
-@EntityListeners(Auditable.class)
 public class UserEntity extends Auditable{
 
     @Id
